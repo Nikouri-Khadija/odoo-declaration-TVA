@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Séquence de numérotation -->
+    <record id="seq_declaration_tva_edi" model="ir.sequence">
+        <field name="name">Déclaration TVA EDI</field>
+        <field name="code">declaration.tva.edi</field>
+        <field name="prefix">TVA/EDI/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Vue liste -->
+    <record id="view_declaration_tva_edi_list" model="ir.ui.view">
+        <field name="name">declaration.tva.edi.list</field>
+        <field name="model">declaration.tva.edi</field>
+        <field name="arch" type="xml">
+            <list string="Déclarations TVA EDI" decoration-success="state == 'done'">
+                <field name="name"           string="Référence"/>
+                <field name="company_id"     string="Société"/>
+                <field name="annee"          string="Année"/>
+                <field name="regime"         string="Régime"/>
+                <field name="periode"        string="Période"/>
+                <field name="prorata"        string="Prorata (%)"/>
+                <field name="nb_factures"    string="Nb factures"/>
+                <field name="date_declaration" string="Date"/>
+                <field name="state" string="Statut" widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-warning="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vue formulaire -->
+    <record id="view_declaration_tva_edi_form" model="ir.ui.view">
+        <field name="name">declaration.tva.edi.form</field>
+        <field name="model">declaration.tva.edi</field>
+        <field name="arch" type="xml">
+            <form string="Déclaration TVA EDI">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(account.action_move_in_invoice_type)d"
+                                type="action"
+                                class="oe_stat_button"
+                                icon="fa-file-text-o"
+                                context="{'default_move_type': 'in_invoice'}">
+                            <field name="nb_factures" widget="statinfo" string="Factures"/>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+
+                    <group>
+                        <group string="Informations">
+                            <field name="company_id"       readonly="1"/>
+                            <field name="annee"            readonly="1"/>
+                            <field name="regime"           readonly="1"/>
+                            <field name="periode"          readonly="1"/>
+                            <field name="prorata"          readonly="1"/>
+                            <field name="date_declaration" readonly="1"/>
+                        </group>
+                        <group string="Téléchargement">
+                            <div colspan="2">
+                                <p class="text-success" invisible="state != 'done'">
+                                    <i class="fa fa-check-circle"/>
+                                    Le fichier XML a été généré et compressé en ZIP.
+                                    Cliquez ci-dessous pour le télécharger.
+                                </p>
+                                <field name="xml_file"
+                                       widget="binary"
+                                       filename="xml_filename"
+                                       string="Télécharger le ZIP"/>
+                                <field name="xml_filename" invisible="1"/>
+                            </div>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Factures déclarées">
+                            <field name="move_ids" readonly="1">
+                                <list string="Factures">
+                                    <field name="name"                  string="N° Facture"/>
+                                    <field name="invoice_date"          string="Date"/>
+                                    <field name="partner_id"            string="Fournisseur"/>
+                                    <field name="amount_untaxed"        string="Montant HT"/>
+                                    <field name="amount_tax"            string="TVA"/>
+                                    <field name="amount_total"          string="TTC"/>
+                                    <field name="payment_mode_display"  string="Mode de paiement"/>
+                                    <field name="payment_date_display"  string="Date de paiement"/>
+                                    <field name="tva_declaration_period" string="Période"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action fenêtre -->
+    <record id="action_declaration_tva_edi" model="ir.actions.act_window">
+        <field name="name">Déclarations TVA EDI</field>
+        <field name="res_model">declaration.tva.edi</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucune déclaration TVA EDI trouvée.
+            </p>
+            <p>
+                Sélectionnez des factures fournisseurs et cliquez sur
+                <b>Action → Déclarer TVA EDI</b> pour générer votre première déclaration.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_declaration_tva_edi_root"
+              name="Déclarations TVA EDI"
+              parent="account.menu_finance_payables"
+              action="action_declaration_tva_edi"
+              sequence="90"/>
+
+</odoo>

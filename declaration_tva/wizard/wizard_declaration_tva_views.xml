@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══════════════════════════════════════════════════════════
+         Wizard — Déclaration TVA EDI (2 étapes)
+         ══════════════════════════════════════════════════════════ -->
+    <record id="view_wizard_declaration_tva_form" model="ir.ui.view">
+        <field name="name">wizard.declaration.tva.form</field>
+        <field name="model">wizard.declaration.tva</field>
+        <field name="arch" type="xml">
+            <form string="Déclaration TVA EDI — SIMPL-TVA">
+
+                <!-- ── ÉTAPE 1 : Paramètres ───────────────────────────── -->
+                <group invisible="state != 'params'" string="Paramètres de la déclaration">
+
+                    <group string="Société &amp; Période">
+                        <field name="company_id"/>
+                        <field name="annee"/>
+                        <field name="regime" widget="radio" options="{'horizontal': true}"/>
+                        <field name="periode_mensuelle"
+                               invisible="regime != '1'"
+                               required="regime == '1'"/>
+                        <field name="periode_trimestrielle"
+                               invisible="regime != '2'"
+                               required="regime == '2'"/>
+                    </group>
+
+                    <group string="Options">
+                        <field name="prorata"
+                               help="Saisir le pourcentage de prorata de déduction (ex : 70 pour 70 %)."/>
+                        <field name="forcer_redeclaration"/>
+                    </group>
+
+                </group>
+
+                <!-- ── ÉTAPE 2 : Synthèse ─────────────────────────────── -->
+                <group invisible="state != 'preview'">
+
+                    <!-- Avertissement factures déjà déclarées -->
+                    <div class="alert alert-warning"
+                         role="alert"
+                         invisible="not has_already_declared">
+                        <i class="fa fa-exclamation-triangle"/>
+                        <b> Attention :</b>
+                        Des factures déjà déclarées (lignes en orange) seront re-déclarées.
+                    </div>
+
+                    <field name="line_ids" nolabel="1">
+                        <list editable="bottom"
+                              decoration-warning="already_declared == True"
+                              string="Relevé de déduction TVA">
+                            <field name="ord"          string="N°"/>
+                            <field name="num"          string="N° Facture"/>
+                            <field name="dfac"         string="Date Facture"/>
+                            <field name="partner_nom"  string="Fournisseur"/>
+                            <field name="partner_if"   string="IF"/>
+                            <field name="partner_ice"  string="ICE"/>
+                            <field name="des"          string="Désignation"/>
+                            <field name="mht"          string="Montant HT"  sum="Total HT"/>
+                            <field name="tx"           string="Taux (%)"/>
+                            <field name="tva"          string="TVA"         sum="Total TVA"/>
+                            <field name="ttc"          string="TTC"         sum="Total TTC"/>
+                            <field name="prorata"      string="Prorata (%)"/>
+                            <field name="mp_id"        string="Mode Paiement"/>
+                            <field name="dpai"         string="Date Paiement"/>
+                            <field name="already_declared" string="Déjà déclarée" readonly="1"/>
+                            <field name="move_id"    column_invisible="True"/>
+                            <field name="wizard_id"  column_invisible="True"/>
+                        </list>
+                    </field>
+
+                </group>
+
+                <!-- Champs techniques invisibles -->
+                <field name="state"                invisible="1"/>
+                <field name="has_already_declared" invisible="1"/>
+                <field name="move_ids_context"     invisible="1"/>
+
+                <!-- ── Boutons ────────────────────────────────────────── -->
+                <footer>
+                    <button name="action_generer_declaration"
+                            string="Générer la déclaration"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'params'"/>
+
+                    <button name="action_confirmer_et_generer"
+                            string="Confirmer et générer le XML"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'preview'"/>
+
+                    <button name="action_retour_params"
+                            string="← Retour"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state != 'preview'"/>
+
+                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+                </footer>
+
+            </form>
+        </field>
+    </record>
+
+    <!-- Action : lancée depuis la liste des factures -->
+    <record id="action_wizard_declaration_tva" model="ir.actions.act_window">
+        <field name="name">Déclarer TVA EDI</field>
+        <field name="res_model">wizard.declaration.tva</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_view_types">list</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Colonnes TVA dans la liste des factures fournisseurs -->
+    <record id="view_in_invoice_tree_tva_declared" model="ir.ui.view">
+        <field name="name">account.move.in_invoice.list.tva_declared</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_invoice_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='status_in_payment']" position="after">
+                <field name="tva_declared"          string="TVA Déclarée"      optional="show"/>
+                <field name="tva_declaration_period" string="Période déclarée" optional="hide"/>
+                <field name="tva_declaration_date"   string="Date déclaration" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Champs TVA dans le formulaire de la facture fournisseur -->
+    <record id="view_in_invoice_form_tva_declared" model="ir.ui.view">
+        <field name="name">account.move.in_invoice.form.tva_declared</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='other_info']//field[@name='checked']" position="after">
+                <field name="tva_declared"          readonly="1" string="TVA Déclarée"/>
+                <field name="tva_declaration_period" readonly="1" invisible="not tva_declared" string="Période déclarée"/>
+                <field name="tva_declaration_date"   readonly="1" invisible="not tva_declared" string="Date de déclaration"/>
+                <field name="tva_declaration_id"     readonly="1" invisible="not tva_declared" string="Déclaration TVA"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
